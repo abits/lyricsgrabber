@@ -1,0 +1,80 @@
+lyricsgrabber 0.1.1
+Chris Martel <accidentalbits@googlemail.com>
+02.10.2010
+
+
+General Information
+===================
+Lyricsgrabber is a very simple python script which searches lyrics  for
+MP3s  and  embeds  them in their tags. Relies on leoslyrics.com, chart-
+lyrics.com, and eyeD3 for tagging. You pass Lyricsgrabber  a  directory
+or  it  automatically starts in the current working directory.  It then
+collects all MP3 files in that directory, looks up their lyrics accord-
+ing  to  artist  and  trackname tags and, if it finds some text, stores
+them in the appropriate tag.  If successful, it should be  possible  to
+view the song lyrics on your iPod.  You could make Lyricsgrabber search
+for MP3 files recursively below  the  start  directory.   Lyricsgrabber
+features logging, so you could see what texts have been written to what
+files.
+
+
+Requirements
+============
+ - Python (http://www.python.org/) >= 2.3
+ - eyeD3 (http://eyed3.nicfit.net/) >= 0.6.17
+
+Installation
+============
+
+Source tarball
+--------------
+
+     gzip -dc lyricsgrabber-0.1.1.tar.gz | tar xvf -
+     cd lyricsgrabber-0.1.1
+     ./configure
+     maker
+     make install (as root)
+
+
+How to use LyricsGrabber
+================
+Lyricsgrabber has an interactive mode: it display the  text  found
+on  the internet and ask the user whether it should be written to file.
+Use the program at your own risk!
+
+  Usage
+  =====
+    lyricsgrabber [OPTS] [directory]
+  
+  Options
+  =======
+       --version
+              show program’s version number and exit
+
+       -h     display a short help text and exit
+
+       -f     overwrite existing lyrics tags
+
+       -i     interactive mode, ask user before writing to each file
+
+       -o LOGFILE
+              save an activity log to LOGFILE
+
+       -v     print log messages to stdout
+
+       -r     scan directory recursively
+
+
+Support
+=======
+Check out the project website (http://gitorious.org/lyricsgrabber).
+
+Bugs and Patches
+================
+Find bugs! Please submit all comments, bug reports, or feature requests
+to Chris <accidentalbits@googlemail.com>.
+
+See also
+========
+LyricsGrabber is free software, refer to the COPYING (COPYING) file for details.
+See the TODO (TODO) file for possible enhancements.

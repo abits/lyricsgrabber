@@ -1,0 +1,3 @@
+include README TODO NEWS COPYING
+recursive-include doc *.1 *.nroff
+prune test/* etc/*

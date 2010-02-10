@@ -1,0 +1,5 @@
+Possible Enhancements:
+======================
+  - better handling of non-ascii text encodings
+  - modularize web site clients (plugin structure)
+  - support for more web sites
