@@ -65,23 +65,27 @@ class TagHandler:
         @rtype boolean
         @return: true if modified, false if not'''
         #print "DEBUG: %s" % type(lyrics)
-        #lyrics = unicode(lyrics).encode('latin-1')
+        #lyrics = unicode(lyrics).encode('utf-8')
         lyrics = lyrics.replace("\n", "")
         #print "DEBUG: %s" % type(lyrics)
         tag = eyeD3.Tag()
+        tag.header.setVersion(eyeD3.ID3_V2_4)
+        tag.encoding = "\x03" # set UTF-8 encoding
         tag.link(mp3File)
-        tag.header.setVersion(eyeD3.ID3_V2_3)
-        if self.settings['force'] == True:
-            tag.addLyrics(lyrics)
-            tag.update()
-            return True
-        else: # test for existing lyrics before write
-            existingTag = tag.getLyrics()
-            if len(existingTag) == 0: # no lyric frames, so we can write
+        try:
+            if self.settings['force'] == True:
                 tag.addLyrics(lyrics)
-                tag.update()          
+                tag.update()
                 return True
-        return False  
+            else: # test for existing lyrics before write
+                existingTag = tag.getLyrics()
+                if len(existingTag) == 0: # no lyric frames, so we can write
+                    tag.addLyrics(lyrics)
+                    tag.update()          
+                    return True
+            return False
+        except:
+            return False
     
     def addLyricsFromFile(self, mp3File, lyricsFile):
         '''write lyrics from text file to mp3 file
@@ -93,7 +97,7 @@ class TagHandler:
         lyrics = lyrics.replace("\r", "\r\n")  
         tag = eyeD3.Tag()
         tag.link(mp3File)
-        tag.header.setVersion(eyeD3.ID3_V2_3)
+        tag.header.setVersion(eyeD3.ID3_V2_4)
         tag.addLyrics(lyrics)
         tag.update()
     

@@ -46,10 +46,15 @@ class Logger():
     def addToLog(self, string):
         if self.settings['logFileName'] != None:
             self.logFile = open(self.settings['logFileName'], "a")
-            self.logFile.write("%s:\t%s\n" % (self.getTimeString(), string))
+            try: 
+                self.logFile.write("%s:\t%s\n" % (self.getTimeString(),
+                                                  unicode(string)))
+            except:
+                self.logFile.write(("%s:\t%s\n" % (self.getTimeString(),
+                                               "logging error")))
             if self.settings['verbose'] == True:
                 print "LyricsGrabber: " + string
-            self.logFile.close()
+                self.logFile.close()
         else:
             if self.settings['verbose'] == True:
                 print "LyricsGrabber: " + string
