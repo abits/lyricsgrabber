@@ -9,31 +9,32 @@
 # option) any later version.
 # This program is distributed in the hope that it will be useful, but 
 # WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
-# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License f
-# or more details.
+# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+# for more details.
 #
 # You should have received a copy of the GNU General Public License 
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 
+import os
+from optparse import OptionParser
+import eyeD3
 import LyricsGrabber.ClTrawler
 import LyricsGrabber.LlTrawler
 import LyricsGrabber.TagHandler
 import LyricsGrabber.Walker
 import LyricsGrabber.Timer
 import LyricsGrabber.Logger
-import eyeD3
-import os
-from optparse import OptionParser
+
 
 if __name__ == '__main__':
     # globals
-    ignoredCount = 0 # files which have been found but won't be modified
-    fileCount = 0 # files that may be modified
-    modifiedCount = 0 # files which have been modified
-    unresolvedCount = 0 # files where no lyrics could be found
-    files = [] # holds file info to work with
+    ignored_count = 0 # Files which have been found but won't be modified.
+    file_count = 0 # Files that may be modified.
+    modified_count = 0 # Files which have been modified.
+    unresolved_count = 0 # Files where no lyrics could be found.
+    files = [] # Holds file info to work with.
     
-    # parse user options
+    # Parse user options.
     usage = "usage: %prog [options] [DIRPATH]"
     parser = OptionParser(usage=usage, version="%prog 0.1")
     parser.add_option("-f", "--force", dest="force",
@@ -55,77 +56,92 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     if len(args) > 1:
         parser.error("incorrect number of arguments")
-    settings = { 'verbose' : options.verbose,
-                 'force' : options.force,
-                 'logFileName' : options.logFileName,
-                 'interactive' : options.interactive,
-                 'recursive' : options.recursive }
+    settings = {'verbose' : options.verbose,
+                'force' : options.force,
+                'logFileName' : options.logFileName,
+                'interactive' : options.interactive,
+                'recursive' : options.recursive}
     
-    # start logger and initialize components
-    myLogger = LyricsGrabber.Logger.Logger(settings)
-    logString = "\n\t verbose: %s\n\t force: %s\n\t interactive: %s" % (settings['verbose'],
-                                                                                           settings['force'], settings['interactive'])
-    myLogger.addToLog(logString)
-    myWalker = LyricsGrabber.Walker.Walker(settings)
-    tH = LyricsGrabber.TagHandler.TagHandler(settings)
-    leoTrawler = LyricsGrabber.LlTrawler.LlTrawler("duane")
-    clTrawler = LyricsGrabber.ClTrawler.ClTrawler(settings)
-    myTimer = LyricsGrabber.Timer.Timer()
+    # Start logger and initialize components.
+    my_logger = LyricsGrabber.Logger.Logger(settings)
+    log_string = ("\n\t verbose: %s\n\t force: %s\n\t interactive: %s" % 
+    	         (settings['verbose'], 
+    	          settings['force'], 
+    	          settings['interactive']))
+    my_logger.addToLog(log_string)
+    my_walker = LyricsGrabber.Walker.Walker(settings)
+    my_tag_handler = LyricsGrabber.TagHandler.TagHandler(settings)
+    my_leo_trawler = LyricsGrabber.LlTrawler.LlTrawler("duane")
+    my_chartlyrics_trawler = LyricsGrabber.ClTrawler.ClTrawler(settings)
+    my_timer = LyricsGrabber.Timer.Timer()
     
-    # initialize working directory
+    # Initialize working directory.
     if len(args) == 0:
         myDir = os.getcwd()
     else:
         myDir = args[0]
     myDir = os.path.abspath(myDir)
-    logString = "Working on %s" % myDir
-    myLogger.addToLog(logString)
+    log_string = "Working on %s" % myDir
+    my_logger.addToLog(log_string)
     
-    # scan working directory and web for lyrics, then modify MP3 files
-    myTimer.start()
-    myWalker.walk(myDir)
-    ignoredCount, fileCount = myWalker.getFileCounts()
-    files = myWalker.getFiles()
+    # Scan working directory and web for lyrics, then modify MP3 file.
+    my_timer.start()
+    my_walker.walk(myDir)
+    ignored_count, file_count = my_walker.getFileCounts()
+    files = my_walker.getFiles()
     
     for file in files:
         modified = False
-        logString = "Searching lyrics for %s: %s" % (file['artist'].encode('utf-8'), file['track'].encode('utf-8'))
-        myLogger.addToLog(logString)   
-        if leoTrawler.setText(file['artist'], file['track']) == True:
-            lyrics = leoTrawler.getText()
+        log_string = ("Searching lyrics for %s: %s"
+        	(file['artist'].encode('utf-8'), file['track'].encode('utf-8')))
+        my_logger.addToLog(log_string)   
+        if my_leo_trawler.setText(file['artist'], file['track']) == True:
+            lyrics = my_leo_trawler.getText()
             if settings['interactive'] == True:
                 print lyrics
                 print
-        elif clTrawler.setText(file['artist'], file['track']) == True: #we need a second search attempt on another site
-            lyrics = clTrawler.getText()
+        # We need a second search attempt on another site.
+        elif (my_chartlyrics_trawler.setText(file['artist'], file['track']) ==
+              True): 
+            lyrics = my_chartlyrics_trawler.getText()
             if settings['interactive'] == True:
                 print lyrics
                 print
         else: # we didn't find lyrics on the web
-            unresolvedCount += 1
-            logString = "No lyrics found for file %s" % (os.path.basename(file['path']))
-            myLogger.addToLog(logString)
+            unresolved_count += 1
+            log_string = ("No lyrics found for file %s" %
+            	         (os.path.basename(file['path'])))
+            my_logger.addToLog(log_string)
             continue # skip file go to next
-        if lyrics != '': # so we found some lyrics on the web, add them to files
+        # So we found some lyrics on the web, add them to files.
+        if lyrics != '': 
             if settings['interactive'] == True: # we ask politely
-                if raw_input("\t=> Add text above to \"%s: %s\" [yn]? " % (file['artist'], file['track'])) == 'y':
-                    modified = tH.addLyricsFromString(file['path'], lyrics)   
+                if (raw_input("\t=> Add text above to \"%s: %s\" [yn]? " %
+                	(file['artist'], file['track'])) == 'y'):
+                    modified = my_tag_handler.addLyricsFromString(file['path'],
+                                                                  lyrics)   
             else: # we don't care about user and write to file
-                modified = tH.addLyricsFromString(file['path'], lyrics)
+                modified = my_tag_handler.addLyricsFromString(file['path'],
+                                                              lyrics)
             if modified:
-                modifiedCount += 1  
+                modified_count += 1  
                 lyriclines = lyrics.splitlines()
-                logString = "Added text \"%s...\" to file %s" % (lyriclines[0],
-                                                                 os.path.basename(file['path']))
+                log_string = ("Added text \"%s...\" to file %s" %
+                	          (lyriclines[0], os.path.basename(file['path'])))
             else:
                 lyriclines = lyrics.splitlines()
-                logString = "skipped file %s" % (os.path.basename(file['path']))
-            myLogger.addToLog(logString)    
-    myTimer.stop() # done working
-    # add some stats
-    logString = "\n\tRunning time:\t%.2f sec\n" % (myTimer.getTime())
-    logString = logString + "\tignored:\t%9d\n\ttried:\t\t%9d\n\tmodified:\t%9d\n\tunresolved:\t%9d" % (ignoredCount, 
-                                                                                                        fileCount, 
-                                                                                                        modifiedCount,
-                                                                                                        unresolvedCount)
-    myLogger.addToLog(logString)
+                log_string = ("skipped file %s" %
+                	          (os.path.basename(file['path'])))
+            my_logger.addToLog(log_string)    
+    my_timer.stop() # done working
+    
+    # Add runtime stats.
+    log_string = "\n\tRunning time:\t%.2f sec\n" % (my_timer.getTime())  
+    log_string = log_string + \
+                ("\tignored:\t%9d\n\
+                  \ttried:\t\t%9d\n\
+                  \tmodified:\t%9d\n\
+                  \tunresolved:\t%9d" % 
+                  (ignored_count, file_count, 
+                   modified_count, unresolved_count))
+    my_logger.addToLog (log_string)
