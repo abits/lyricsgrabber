@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # lyricsgrabber.py - adds lyrics to MP3 files
 #
 # Copyright (C) 2010 Christoph Martel
@@ -15,9 +16,39 @@
 # You should have received a copy of the GNU General Public License 
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 
+'''
+Lyricsgrabber is a python package which searches lyrics for
+MP3s and embeds them in their tags.  Relies on leoslyrics.com,
+chartlyrics.com, and eyeD3 for tagging.  You pass Lyricsgrabber a directory
+or it automatically starts in the current working directory.  It then
+collects all MP3 files in that directory, looks up their lyrics according
+to artist and trackname tags and, if it finds some text, stores
+them in the appropriate tag.  If successful, it should be possible to
+view the song lyrics on your iPod.  You could make Lyricsgrabber search
+for MP3 files recursively below the start directory.  Lyricsgrabber
+features logging, so you could see what texts have been written to what
+files.
+
+Lyricsgrabber has an interactive mode: it display the text found
+on the internet and ask the user whether it should be written to file.
+Use the program at your own risk!
+
+Usage: lyricsgrabber [OPTS] [directory]
+
+Options:
+    --version   show program’s version number and exit
+    -h  display a short help text and exit
+    -f  overwrite existing lyrics tags
+    -i  interactive mode, ask user before writing to each file
+    -o  LOGFILE save an activity log to LOGFILE
+    -v  print log messages to stdout
+    -r  scan directory recursively
+
+'''
+
+
 import os
 from optparse import OptionParser
-import eyeD3
 import LyricsGrabber.ClTrawler
 import LyricsGrabber.LlTrawler
 import LyricsGrabber.TagHandler
@@ -63,47 +94,48 @@ if __name__ == '__main__':
                 'recursive' : options.recursive}
     
     # Start logger and initialize components.
-    my_logger = LyricsGrabber.Logger.Logger(settings)
+    logger = LyricsGrabber.Logger.Logger(settings)
     log_string = ("\n\t verbose: %s\n\t force: %s\n\t interactive: %s" % 
     	         (settings['verbose'], 
     	          settings['force'], 
     	          settings['interactive']))
-    my_logger.addToLog(log_string)
-    my_walker = LyricsGrabber.Walker.Walker(settings)
-    my_tag_handler = LyricsGrabber.TagHandler.TagHandler(settings)
-    my_leo_trawler = LyricsGrabber.LlTrawler.LlTrawler("duane")
-    my_chartlyrics_trawler = LyricsGrabber.ClTrawler.ClTrawler(settings)
-    my_timer = LyricsGrabber.Timer.Timer()
+    logger.addToLog(log_string)
+    walker = LyricsGrabber.Walker.Walker(settings)
+    tag_handler = LyricsGrabber.TagHandler.TagHandler(settings)
+    leo_trawler = LyricsGrabber.LlTrawler.LlTrawler("duane")
+    chartlyrics_trawler = LyricsGrabber.ClTrawler.ClTrawler(settings)
+    timer = LyricsGrabber.Timer.Timer()
     
     # Initialize working directory.
     if len(args) == 0:
-        myDir = os.getcwd()
+        work_directory = os.getcwd()
     else:
-        myDir = args[0]
-    myDir = os.path.abspath(myDir)
-    log_string = "Working on %s" % myDir
-    my_logger.addToLog(log_string)
+        work_directory = args[0]
+    work_directory = os.path.abspath(work_directory)
+    log_string = "Working on %s" % work_directory
+    logger.addToLog(log_string)
     
-    # Scan working directory and web for lyrics, then modify MP3 file.
-    my_timer.start()
-    my_walker.walk(myDir)
-    ignored_count, file_count = my_walker.getFileCounts()
-    files = my_walker.getFiles()
+    # Scan work directory and web for lyrics, then modify MP3 file.
+    timer.start()
+    walker.walk(work_directory)
+    ignored_count, file_count = walker.getFileCounts()
+    files = walker.getFiles()
     
     for file in files:
         modified = False
-        log_string = ("Searching lyrics for %s: %s"
+        log_string = ("Searching lyrics for %s: %s" %
         	(file['artist'].encode('utf-8'), file['track'].encode('utf-8')))
-        my_logger.addToLog(log_string)   
-        if my_leo_trawler.setText(file['artist'], file['track']) == True:
-            lyrics = my_leo_trawler.getText()
+        logger.addToLog(log_string)   
+        if leo_trawler.setText(file['artist'], file['track']) == True:
+            lyrics = leo_trawler.getText()
             if settings['interactive'] == True:
                 print lyrics
                 print
         # We need a second search attempt on another site.
-        elif (my_chartlyrics_trawler.setText(file['artist'], file['track']) ==
+        elif (chartlyrics_trawler.set_text(file['artist'], file['track']) ==
+        #if (chartlyrics_trawler.set_text(file['artist'], file['track']) ==
               True): 
-            lyrics = my_chartlyrics_trawler.getText()
+            lyrics = chartlyrics_trawler.get_text()
             if settings['interactive'] == True:
                 print lyrics
                 print
@@ -111,32 +143,32 @@ if __name__ == '__main__':
             unresolved_count += 1
             log_string = ("No lyrics found for file %s" %
             	         (os.path.basename(file['path'])))
-            my_logger.addToLog(log_string)
+            logger.addToLog(log_string)
             continue # skip file go to next
         # So we found some lyrics on the web, add them to files.
         if lyrics != '': 
             if settings['interactive'] == True: # we ask politely
                 if (raw_input("\t=> Add text above to \"%s: %s\" [yn]? " %
                 	(file['artist'], file['track'])) == 'y'):
-                    modified = my_tag_handler.addLyricsFromString(file['path'],
+                    modified = tag_handler.addLyricsFromString(file['path'],
                                                                   lyrics)   
             else: # we don't care about user and write to file
-                modified = my_tag_handler.addLyricsFromString(file['path'],
+                modified = tag_handler.addLyricsFromString(file['path'],
                                                               lyrics)
             if modified:
                 modified_count += 1  
-                lyriclines = lyrics.splitlines()
+                lyricslines = lyrics.splitlines()
                 log_string = ("Added text \"%s...\" to file %s" %
-                	          (lyriclines[0], os.path.basename(file['path'])))
+                	          (lyricslines[0], os.path.basename(file['path'])))
             else:
-                lyriclines = lyrics.splitlines()
+                lyricslines = lyrics.splitlines()
                 log_string = ("skipped file %s" %
                 	          (os.path.basename(file['path'])))
-            my_logger.addToLog(log_string)    
-    my_timer.stop() # done working
+            logger.addToLog(log_string)    
+    timer.stop() # done working
     
     # Add runtime stats.
-    log_string = "\n\tRunning time:\t%.2f sec\n" % (my_timer.getTime())  
+    log_string = "\n\tRunning time:\t%.2f sec\n" % (timer.getTime())  
     log_string = log_string + \
                 ("\tignored:\t%9d\n\
                   \ttried:\t\t%9d\n\
@@ -144,4 +176,4 @@ if __name__ == '__main__':
                   \tunresolved:\t%9d" % 
                   (ignored_count, file_count, 
                    modified_count, unresolved_count))
-    my_logger.addToLog (log_string)
+    logger.addToLog (log_string)

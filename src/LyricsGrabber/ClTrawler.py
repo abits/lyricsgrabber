@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
+#=============================================================================
 # ClTrawler.py - client for <http://www.chartlyrics.com/>
-#
+# -*- coding: utf-8 -*-
+#----------------------------------------------------------------------------- 
 # Copyright (C) 2010 Christoph Martel
 #
 # This program is free software; you can redistribute it and/or modify it 
@@ -11,153 +12,188 @@
 # WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
 # or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License f
 # or more details.
-
+#
 # You should have received a copy of the GNU General Public License 
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
+#============================================================================= 
+'''
+ClTrawler - searches and extracts lyrics against chartlyrics API.
+@author: Christoph Martel
+@copyright: Christoph Martel
+@license: GPLv3
+'''
 
-import urllib, urllib2
+
+import urllib2
 import xml.etree.ElementTree as ET
 
+
 class ClTrawler():
-    '''An object retrieves song lyrics from <http://www.chartlyrics.com/> via REST API.
-    Response may be written to file.
+
+    '''
+    Retrieves song lyrics from <http://www.chartlyrics.com/> via REST API.
     
     A typical usage might look like:
-        clTrawler = ClTrawler()
-        clTrawler.setText(someArtist, someSong)
-        if clTrawler.getText() != '':    # make sure we have found lyrics for that song
-            lyrics = clTrawler.getText() # read out the song lyrics
+        trawler = ClTrawler()
+        trawler.set_text(someArtist, someSong)
+        if trawler.get_text() != '':    # make sure we have found lyrics
+            lyrics = trawler.get_text() # read out the song lyrics
     
-    If no lyrics are found the stored lyrics property of the object is set to an empty string.
-    @author: Christoph Martel
-    @copyright: Christoph Martel
-    @license: GPLv3
+    If no lyrics are found, the stored lyrics property of the object is set to 
+    an empty string.  Responses may also be written to file.
     '''
+
     def __init__(self, settings):
-        self.settings = settings
-        self.apiSearchUri = 'http://api.chartlyrics.com/apiv1.asmx/SearchLyric'
-        self.apiLyricsUri = 'http://api.chartlyrics.com/apiv1.asmx/GetLyric'   
-        self.searchResponse = None
-        self.lyricsResponse = None
-        self.LyricChecksum = ''
-        self.lyricId = ''
-        self.text = ''
-    
-    def buildSearchRequest(self, artist, track):
-        '''constructs a url to query ChartLyrics for track lyricId
+        self.__settings = settings
+        self.__API_searchURI = \
+            'http://api.chartlyrics.com/apiv1.asmx/SearchLyric'
+        self.__API_lyrics_URI = \
+            'http://api.chartlyrics.com/apiv1.asmx/GetLyric'
+        self.__search_response = None
+        self.__lyrics_response = None
+        self.__lyrics_checksum = ''
+        self.__lyrics_ID = ''
+        self.__text = ''
+
+    def __build_searchrequest(self, artist, track):
+        '''
+        Constructs a url to query ChartLyrics for track lyrics ID.
+        
         @type artist: string
         @type track: string
         @param artist: name of the artist to search in lyrics database
         @param track: name of the song to retrieve lyrics for
         @rtype: string
-        @return: uri to query ChartLyrics for a track lyricId'''
+        @return: uri to query ChartLyrics for a track lyrics ID
+        '''
         artist = 'artist=' + urllib2.quote(artist.encode('utf-8'))
         track = 'song=' + urllib2.quote(track.encode('utf-8'))
-        paramList = [artist, track]
-        parameters = '&'.join(paramList)
-        uriList = [self.apiSearchUri, parameters]
-        searchRequestUri = '?'.join(uriList)
-        return searchRequestUri
-    
-    def buildLyricsRequest(self, lyricId, lyricChecksum):
-        '''constructs a url to query ChartLyrics for song lyrics
-        @type lyricId: string
-        @param lyricId: track lyricId from Leo's Lyric's database
+        param_list = [artist, track]
+        parameters = '&'.join(param_list)
+        URI_list = [self.__API_searchURI, parameters]
+        search_request_URI = '?'.join(URI_list)
+        return search_request_URI
+
+    def __build_lyricsrequest(self, lyrics_ID, lyrics_checksum):
+        '''
+        Constructs a url to query ChartLyrics for song lyrics.
+        
+        @type lyrics_ID: string
+        @param lyrics_ID: track lyrics ID from Leo's Lyric's database
         @rtype: string
-        @return: uri to query ChartLyrics for song lyrics'''
-        lyricId = 'lyricId=' + self.lyricId        
-        lyricChecksum = 'lyricCheckSum=' + self.lyricChecksum
-        paramList = [lyricId, lyricChecksum]
-        parameters = '&'.join(paramList)
-        uriList = [self.apiLyricsUri, parameters]
-        textRequestUri = '?'.join(uriList)
-        return textRequestUri      
-    
-    def setText(self, artist, track):
-        '''retrieves the lyrics for a track by artist
+        @return: uri to query ChartLyrics for song lyrics
+        '''
+        lyrics_ID = 'lyricId=' + lyrics_ID
+        lyrics_checksum = 'lyricCheckSum=' + lyrics_checksum
+        param_list = [lyrics_ID, lyrics_checksum]
+        parameters = '&'.join(param_list)
+        URI_list = [self.__API_lyrics_URI, parameters]
+        text_request_URI = '?'.join(URI_list)
+        return text_request_URI
+
+    def __extract_ID_and_checksum(self, response):
+        '''
+        Parses xml response file and returns the track lyrics ID.
+        
+        @type responseFileName: string
+        @param responseFileName: path of temp xml file to parse for lyrics ID
+        @rtype: string
+        @return: the track lyrics ID of song we look for
+        '''
+        tree = ET.parse(response)
+        success = True
+        for i in tree.getiterator('{http://api.chartlyrics.com/}LyricId'):
+            lyrics_ID = i.text
+        for i in \
+            tree.getiterator('{http://api.chartlyrics.com/}LyricChecksum'):
+            lyrics_checksum = i.text
+        try:
+            self.__lyrics_ID = lyrics_ID
+            self.__lyrics_checksum = lyrics_checksum
+            if (lyrics_checksum is None) or (lyrics_ID == 0):
+                success = False
+        except:
+            success = False
+        return success
+
+    def __extract_text(self, response):
+        '''
+        Parses xml response file and sets song lyrics property.
+        
+        @type responseFileName: string
+        @param responseFileName: path of the temp xml file to parse for lyrics
+        @rtype: boolean
+        @return: success extracting lyrics
+        '''
+        tree = ET.parse(response)
+        for i in tree.getiterator('{http://api.chartlyrics.com/}Lyric'):
+            text = i.text
+        if text is None:
+            return False
+        else:
+            self.__text = text
+            return True
+
+    def __query_server(self, request_URI):
+        '''
+        Queries the leoslyrics site, returns temp file name with response.
+        
+        @type  request_URI: string
+        @param request_URI: request as return by buildRequest method
+        @rtype: string
+        @return: name of temp file containing server response
+        '''
+        try:
+            response = urllib2.urlopen(request_URI)
+        except urllib2.URLError, e:
+            print 'Error:' + e.read()
+        return response
+
+    def __write_file(self, response, filename):
+        '''
+        Write server response message to file.
+        
+        @type response: string
+        @type filename: string
+        @param response: xml formatted string server response
+        @param filename: name of file to store xml data
+        '''
+        xml_file = open(filename, 'w')
+        for line in response:
+            xml_file.write(line)
+        xml_file.close()
+
+    def get_text(self):
+        '''
+        Return lyrics text string.
+        
+        @rtype: string       
+        @return: lyrics text string
+        '''
+        text = self.__text
+        return text
+
+    def set_text(self, artist, track):
+        '''
+        Retrieves the lyrics for a track by artist.
+        
         @type artist: string
         @type track: string
         @param artist: name of artist to look for
         @param track: name of track we want the lyrics for
         @rtype: boolean
-        @return: success in finding lyrics for that parameters'''
-        self.text = ''
-        lyricIdRequestUri = self.buildSearchRequest(artist, track) # build url
-        self.searchResponse = self.queryServer(lyricIdRequestUri)  # ask server
-        if self.extractIdAndCheckSum(self.searchResponse): # parse response
-            textRequestUri = self.buildLyricsRequest(self.lyricId, self.LyricChecksum)
-            self.lyricsResponse = self.queryServer(textRequestUri)
-            if self.extractText(self.lyricsResponse):
+        @return: success in finding lyrics for that parameters
+        '''
+        self.__text = ''
+        ID_request_URI = self.__build_searchrequest(artist, track)
+        self.__search_response = self.__query_server(ID_request_URI)
+        if self.__extract_ID_and_checksum(self.__search_response):
+            text_request_URI = self.__build_lyricsrequest(self.__lyrics_ID,
+                                                     self.__lyrics_checksum)
+            self.__lyrics_response = self.__query_server(text_request_URI)
+            if self.__extract_text(self.__lyrics_response):
                 return True
             else:
                 return False # no success, no lyrics found
         else:
             return False # no success, no lyrics found
-
-    def extractIdAndCheckSum(self, response):
-        '''parses xml response file and returns the track lyricId
-        @type responseFileName: string
-        @param responseFileName: path of the temp xml file to parse for lyricId
-        @rtype: string
-        @return: the track lyricId of song we look for'''
-        tree = ET.parse(response)
-        success = True
-        for i in tree.getiterator('{http://api.chartlyrics.com/}LyricId'):
-            lyricId = i.text
-        for i in tree.getiterator('{http://api.chartlyrics.com/}LyricChecksum'):
-            lyricChecksum = i.text
-        try: 
-            self.lyricId = lyricId
-            self.lyricChecksum = lyricChecksum
-            if (lyricChecksum == None) or (lyricId == 0):
-                success = False
-        except:
-            success = False
-        return success
-    
-    def extractText(self, response):
-        '''parses xml response file and sets song lyrics property
-        @type responseFileName: string
-        @param responseFileName: path of the temp xml file to parse for lyrics
-        @rtype: boolean
-        @return: success extracting lyrics'''
-        tree = ET.parse(response)
-        for i in tree.getiterator('{http://api.chartlyrics.com/}Lyric'):
-            text = i.text
-        if text == None:
-            return False
-        else:
-            self.text = text
-            return True
-    
-    def queryServer(self, requestUri):
-        '''queries the leoslyrics site, returns temp file name with response
-        @type  requestUri: string
-        @param requestUri: request as return by buildRequest method
-        @rtype: string
-        @return: name of temp file containing server response'''
-        try:
-            response = urllib2.urlopen(requestUri)
-        except urllib2.URLError, e:
-            print 'Error:' + e.read()
-        return response
-
-    def writeFile(self, response, filename):
-        '''Write server response message to file
-        @type response: string
-        @type filename: string
-        @param response: xml formatted string server response
-        @param filename: name of file to store xml data'''
-        xmlFile = open(filename, 'w')
-        for line in response:
-            xmlFile.write(line)
-        xmlFile.close()       
-    
-    def getText(self):
-        '''return lyrics text string
-        @rtype: string       
-        @return: lyrics text string'''
-        #print type(self.text)
-        #text = self.text.encode('ascii', 'replace')
-        text = self.text
-        return text
