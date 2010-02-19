@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
+#==============================================================================
 # LlTrawler.py - client for <http://www.leoslyrics.com/>
-#
+# -*- coding: utf-8 -*-
+#---------------------------------------------------------------------------- #
 # Copyright (C) 2010 Christoph Martel
 #
 # This program is free software; you can redistribute it and/or modify it 
@@ -14,95 +15,90 @@
 #
 # You should have received a copy of the GNU General Public License 
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
+#==============================================================================
+'''
+LlTrawler - searches and extracts lyrics against leoslyrics.com API.
+@author: Christoph Martel
+@copyright: Christoph Martel
+@license: GPLv3
+'''
+
 
 import urllib2
 import xml.etree.ElementTree as ET
 
 class LlTrawler():
-    '''An object retrieves song lyrics from <http://www.leoslyrics.com/> via REST API.
-    Response may be written to file.  Object initialization requires as parameters a user id 
-    from the website for REST calls.
+
+    '''
+    Retrieves song lyrics from <http://www.leoslyrics.com/> via REST API.
+    Response may be written to file.  Object initialization requires as 
+    parameters a user id from the website for REST calls.
     
     A typical usage might look like:
-        leoTrawler = LlTrawler("duane")
-        leoTrawler.setText(someArtist, someSong)
-        if leoTrawler.getText() != '':    # make sure we have found lyrics for that song
-            lyrics = leoTrawler.getText() # read out the song lyrics
+        trawler = LlTrawler("duane")
+        trawler.set_text(someArtist, someSong)
+        if trawler.get_text() != '':    # make sure we have found lyrics
+            lyrics = trawler.get_text() # read out the song lyrics
     
-    If no lyrics are found the stored lyrics property of the object is set to an empty string.
-    @author: Christoph Martel
-    @copyright: Christoph Martel
-    @license: GPLv3    
+    If no lyrics are found the stored lyrics property of the object is set to
+    an empty string.
     '''
-    def __init__(self, uid):
-        self.apiSearchUri = 'http://api.leoslyrics.com/api_search.php'
-        self.apiLyricsUri = 'http://api.leoslyrics.com/api_lyrics.php'   
-        self.hidResponse = None
-        self.textResponse = None
-        self.uid = uid  # use 'duane'
-        self.hid = ''
-        self.text = ''
-    
-    def buildHidRequest(self, artist, track):
-        '''constructs a url to query Leo's Lyrics for track id
+
+    def __init__(self, UID):
+        self.__API_searchURI = 'http://api.leoslyrics.com/api_search.php'
+        self.__API_lyricsURI = 'http://api.leoslyrics.com/api_lyrics.php'
+        self.__response_HID = None
+        self.__response_text = None
+        self.__UID = UID  # use 'duane'
+        self.__HID = ''
+        self.__text = ''
+
+    def __build_HID_request(self, artist, track):
+        '''
+        Constructs a url to query Leo's Lyrics for track id.
+        
         @type artist: string
         @type track: string
         @param artist: name of the artist to search in lyrics database
         @param track: name of the song to retrieve lyrics for
         @rtype: string
-        @return: uri to query Leo's Lyrics for a track id'''
-        auth = 'auth=' + self.uid
+        @return: uri to query Leo's Lyrics for a track id
+        '''
+        auth = 'auth=' + self.__UID
         artist = 'artist=' + urllib2.quote(artist.encode('utf-8'))
         track = 'songtitle=' + urllib2.quote(track.encode('utf-8'))
-        paramList = [auth, artist, track]
-        parameters = '&'.join(paramList)
-        uriList = [self.apiSearchUri, parameters]
-        hidRequestUri = '?'.join(uriList)
-        return hidRequestUri
-    
-    def buildTextRequest(self, hid):
-        '''constructs a url to query Leo's Lyrics for song lyrics
-        @type hid: string
-        @param hid: track id from Leo's Lyric's database
+        param_list = [auth, artist, track]
+        parameters = '&'.join(param_list)
+        URI_list = [self.__API_searchURI, parameters]
+        HID_request_URI = '?'.join(URI_list)
+        return HID_request_URI
+
+    def __build_text_request(self, HID):
+        '''
+        Constructs a url to query Leo's Lyrics for song lyrics.
+        
+        @type HID: string
+        @param HID: track id from Leo's Lyric's database
         @rtype: string
-        @return: uri to query Leo's Lyrics for song lyrics'''
-        auth = 'auth=' + self.uid 
-        hid = 'hid=' + hid
-        paramList = [auth, hid]
-        parameters = '&'.join(paramList)
-        uriList = [self.apiLyricsUri, parameters]
-        textRequestUri = '?'.join(uriList)
-        return textRequestUri      
-    
-    def setText(self, artist, track):
-        '''retrieves the lyrics for a track by artist
-        @type artist: string
-        @type track: string
-        @param artist: name of artist to look for
-        @param track: name of track we want the lyrics for
-        @rtype: boolean
-        @return: success in finding lyrics for that parameters'''
-        self.text = ''   
-        hidRequestUri = self.buildHidRequest(artist, track) # build url
-        self.hidResponse = self.queryServer(hidRequestUri)  # ask server
-        self.hid = self.extractHid(self.hidResponse)         # parse response
-        if self.hid != None:
-            textRequestUri = self.buildTextRequest(self.hid)
-            #print textRequestUri
-            self.textResponse = self.queryServer(textRequestUri)
-            if self.extractText(self.textResponse):
-                return True
-            else:
-                return False # no success, no lyrics found
-        else:
-            return False # no success, no lyrics found
-    
-    def extractHid(self, response):
-        '''parses xml response file and returns the track id
-        @type responseFileName: string
-        @param responseFileName: path of the temp xml file to parse for hid
+        @return: uri to query Leo's Lyrics for song lyrics
+        '''
+        auth = 'auth=' + self.__UID
+        HID = 'hid=' + HID
+        param_list = [auth, HID]
+        parameters = '&'.join(param_list)
+        URI_list = [self.__API_lyricsURI, parameters]
+        text_request_URI = '?'.join(URI_list)
+        return text_request_URI
+
+    def __extract_HID(self, response):
+        '''
+        Parses xml response file and returns the track id.
+        
+        @type response: string
+        @param response: path of the temp xml file to parse for hid
         @rtype: string
-        @return: the track id of song we look for'''
+        @return: the track id of song we look for
+        '''
         tree = ET.parse(response)
         if tree.find('*/result') == None:
             return None
@@ -111,47 +107,82 @@ class LlTrawler():
             return hid
         else:
             return None
-    
-    def extractText(self, response):
-        '''parses xml response file and sets song lyrics property
-        @type responseFileName: string
-        @param responseFileName: path of the temp xml file to parse for lyrics
+
+    def __extract_text(self, response):
+        '''
+        Parses xml response file and sets song lyrics property.
+        
+        @type response: string
+        @param response: path of the temp xml file to parse for lyrics
         @rtype: boolean
-        @return: success extracting lyrics'''
-        #response = unicode(response, 'utf-8').encode('latin-1')
+        @return: success extracting lyrics
+        '''
         tree = ET.parse(response)
         text = tree.findtext('lyric/text')
-        if text == None:
+        if text is None:
             return False
         else:
-            self.text = text
+            self.__text = text
             return True
-    
-    def queryServer(self, requestUri):
-        '''queries the leoslyrics site, returns temp file name with response
-        @type  requestUri: string
-        @param requestUri: request as return by buildRequest method
+
+    def __query_server(self, request_URI):
+        '''
+        Queries the leoslyrics site, returns temp file name with response.
+        
+        @type  request_URI: string
+        @param request_URI: request as return by buildRequest method
         @rtype: string
-        @return: name of temp file containing server response'''
+        @return: name of temp file containing server response
+        '''
         try:
-            response = urllib2.urlopen(requestUri)
-        except urllib2.URLError, e:
-            print 'Error:' + e.read()
+            response = urllib2.urlopen(request_URI)
+        except urllib2.URLError:
+            raise
         return response
 
-    def writeFile(self, response, filename):
-        '''Write server response message to file
+    def __write_file(self, response, filename):
+        '''
+        Write server response message to file.
+        
         @type response: string
         @type filename: string
         @param response: xml formatted string server response
-        @param filename: name of file to store xml data'''
-        xmlFile = open(filename, 'w')
+        @param filename: name of file to store xml data
+        '''
+        xml_file = open(filename, 'w')
         for line in response:
-            xmlFile.write(line)
-        xmlFile.close()       
-    
-    def getText(self):
-        '''return lyrics text string
+            xml_file.write(line)
+        xml_file.close()
+
+    def get_text(self):
+        '''
+        Return lyrics text string.
+        
         @rtype: string       
         @return: lyrics text string'''
-        return self.text        
+        return self.__text
+
+    def set_text(self, artist, track):
+        '''
+        Retrieves the lyrics for a track by artist.
+        
+        @type artist: string
+        @type track: string
+        @param artist: name of artist to look for
+        @param track: name of track we want the lyrics for
+        @rtype: boolean
+        @return: success in finding lyrics for that parameters
+        '''
+        self.__text = ''
+        HID_request_URI = self.__build_HID_request(artist, track) # build url
+        self.__response_HID = self.__query_server(HID_request_URI) # ask server
+        self.__HID = self.__extract_HID(self.__response_HID) # parse response
+        if self.__HID is not None:
+            text_request_URI = self.__build_text_request(self.__HID)
+            self.__response_text = self.__query_server(text_request_URI)
+            if self.__extract_text(self.__response_text):
+                return True
+            else:
+                return False # no success, no lyrics found
+        else:
+            return False # no success, no lyrics found
