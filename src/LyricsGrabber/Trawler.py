@@ -44,12 +44,12 @@ class Trawler():
 
     def query_server(self, request_URI):
         '''
-        Queries the leoslyrics site, returns temp file name with response.
+        Queries the leoslyrics site, sets temp file name with response.
         
         @type  request_URI: string
         @param request_URI: request as return by buildRequest method
-        @rtype: string
-        @return: name of temp file containing server response
+        @rtype: boolean
+        @return: did we successfully communicate with the server
         '''
         try:
             self.response = urllib2.urlopen(request_URI)

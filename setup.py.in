@@ -11,5 +11,5 @@ setup(name='LyricsGrabber',
       url='http://lyricsgrabber.sourceforge.net/',
       package_dir = {'': 'src'},
       packages=['LyricsGrabber'],
-      scripts=['src/lyricsgrabber']
+      scripts=['src/lyricsgrabber.py']
      )

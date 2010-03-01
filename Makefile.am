@@ -20,6 +20,7 @@ module:
 install:
 	${PYTHON} setup.py install ${SETUP_ARGS}
 	
+	-mv -f ${bindir}/lyricsgrabber.py ${bindir}/lyricsgrabber
 	install -m 755 -d ${docdir}
 	install -m 644 README ${docdir}
 	install -m 644 AUTHORS ${docdir}
