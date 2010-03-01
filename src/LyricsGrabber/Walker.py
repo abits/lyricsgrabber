@@ -1,5 +1,7 @@
-# -*- coding: utf-8 -*-
+#==============================================================================
 # Walker.py - scans directories for suitable MP3 files
+# -*- coding: utf-8 -*-
+#----------------------------------------------------------------------------- 
 #
 # Copyright (C) 2010 Christoph Martel
 #
@@ -14,21 +16,30 @@
 #
 # You should have received a copy of the GNU General Public License 
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
+#==============================================================================
+'''
+Walker - scans a directory for suitable files
+@copyright: Christoph Martel
+@license: GPLv3
+@author: Christoph Martel
+@version: 0.1
+'''
 
 import os
 import eyeD3
 import TagHandler
 
 class Walker():
-    '''scans a directory for suitable files and stores them with tag information in an array.
+    '''Scans a directory and stores suitable files with tag information.
     
     Typical usage would be:
-    myWalker = Walker(someSettings)
-    myWalker.walk(someDir)
-    fileList = myWalker.getFiles()
-    (ignored, added) = myWalker.getFileCounts
+    walker = Walker(someSettings)
+    walker.walk(someDir)
+    fileList = walker.getFiles()
+    (ignored, added) = walker.getFileCounts
     
-    The settings parameter for initialization is a directory which holds the following information
+    The settings parameter for initialization is a directory which holds the 
+    following information
         settings = { 'verbose' : someBoolean,
                      'force' : someBoolean,
                      'logFileName' : someString,
@@ -40,63 +51,75 @@ class Walker():
                 'track' : someSong,
                 'album' : someAlbum,
                 'lyrics' : [] }
-                
-    @copyright: Christoph Martel
-    @license: GPLv3
-    @author: Christoph Martel
-    @version: 0.1
     '''
     def __init__(self, settings):
-        self.settings = settings
-        self.fileContainer = []
-        self.ignoredFilesCount = 0
-        self.addedFilesCount = 0
+        self.__settings = settings
+        self.__file_container = []
+        self.__ignored_files_count = 0
+        self.__added_files_count = 0
+
+    def walk(self, startdir):
+        '''
+        Walks through directory tree, collects suitable files for tagging.
         
-    def walk(self, startDir):
-        '''walks through directory tree, collects suitable files for tagging
-        @type startDir: string
-        @param startDir: path of top level directory to walk down'''
-        if self.settings['recursive']:
-            for dirpath, dirnames, filenames in os.walk(startDir):
+        @type startdir: string
+        @param startdir: path of top level directory to walk down
+        '''
+        if self.__settings['recursive']:
+            for dirpath, dirnames, filenames in os.walk(startdir):
                 for f in filenames:
-                    self.filterAndStoreFile(os.path.join(dirpath, f))
+                    self.__filter_and_store_file(os.path.join(dirpath, f))
         else: # we don't want recursive scan
-            for entry in os.listdir(startDir):
+            for entry in os.listdir(startdir):
                 if os.path.isdir(entry):
                     continue
                 else:
-                    self.filterAndStoreFile(os.path.join(os.path.abspath(startDir), entry))            
-            
-    def filterAndStoreFile(self, fpath):
-        '''test whether file is suitable, read it's tags and store information
+                    self.__filter_and_store_file(\
+                    os.path.join (os.path.abspath(startdir), entry))
+
+    def __filter_and_store_file(self, fpath):
+        '''
+        Test whether file is suitable, read it's tags and store information.
+        
         @type fpath: string
-        @param fpath: path of file to be tested'''
-        tH = TagHandler.TagHandler(self.settings)
-        file = {'path' : fpath,  # this is the data structure which holds information of file
+        @param fpath: path of file to be tested
+        '''
+        tH = TagHandler.TagHandler(self.__settings)
+        # this is the data structure which holds information of file
+        file = {'path' : fpath,
                 'artist' : '',
                 'track' : '',
                 'album' : '',
                 'lyrics' : [] }
-        if not eyeD3.isMp3File(file['path']): 
-            self.ignoredFilesCount += 1
+        if not eyeD3.isMp3File(file['path']):
+            self.__ignored_files_count += 1
             return False
         else:
-            tH.setMp3Tags(file['path'])
-            (file['artist'], file['track'], file['album'], file['lyrics']) = tH.getMp3Tags()
-        if (self.settings['force'] == False) and (file['lyrics'] != []):
+            tH.set_MP3_tags(file['path'])
+            (file['artist'],
+             file['track'],
+             file['album'],
+             file['lyrics']) = tH.get_MP3_tags()
+        if not self.__settings['force'] or file['lyrics'] != []:
             return False
         else:
-            self.fileContainer.append(file)
-            self.addedFilesCount += 1
-                    
+            self.__file_container.append(file)
+            self.__added_files_count += 1
+
     def getFiles(self):
-        '''returns stored list of suitable files for tagging
+        '''
+        Returns stored list of suitable files.
+        
         @rtype: list
-        @return: stored list of suitable files for tagging (object property)'''
-        return self.fileContainer
-    
+        @return: stored list of suitable files for tagging (object property)
+        '''
+        return self.__file_container
+
     def getFileCounts(self):
-        '''returns stored properties of ignored/selected files for tagging
+        '''
+        Returns stored properties of ignored/selected files.
+        
         @rtype: tuple
-        @return: stored properties of ignored/selected files for tagging'''
-        return self.ignoredFilesCount, self.addedFilesCount
+        @return: stored properties of ignored/selected files for tagging
+        '''
+        return self.__ignored_files_count, self.__added_files_count

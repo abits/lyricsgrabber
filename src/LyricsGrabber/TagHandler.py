@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
+#==============================================================================
 # TagHandler.py - reads and writes lyrics tags to MP3 files with eyeD3
-#
+# -*- coding: utf-8 -*-
+#---------------------------------------------------------------------------- #
 # Copyright (C) 2010 Christoph Martel
 #
 # This program is free software; you can redistribute it and/or modify it 
@@ -9,61 +10,87 @@
 # option) any later version.
 # This program is distributed in the hope that it will be useful, but 
 # WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
-# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License f
-# or more details.
+# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+# for more details.
 
 # You should have received a copy of the GNU General Public License 
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
+#==============================================================================
+'''
+TagHandler - Reads and writes MP3 lyrics tags based upon eyeD3 library.
+@author: Christoph Martel
+@copyright: Christoph Martel
+@license: GPLv3
+'''
+
 
 import sys
 import eyeD3
 
+
 class TagHandler:
-    '''reads and writes MP3 lyrics tags based upon eyeD3 library
+
+    '''
+    Reads and writes MP3 lyrics tags based upon eyeD3 library.
+    
     Typical usage:
-        tH = TagHandler.TagHandler(settings)
-        tH.setMp3Tags(file)
-        (artist, track, album, lyrics) = tH.getMp3Tags()
+        tagger = TagHandler.TagHandler(settings)
+        tagger.set_MP3_tags(file)
+        (artist, track, album, lyrics) = tagger.get_MP3_tags()
+        
     An object initialization needs a settings dictionary that holds
     at least a key named "force" pointing to a boolean - files which already
     hold lyrics are only witten when this boolean yields True.
-'''
+    '''
+
     def __init__(self, settings):
-        '''object initialization
-        @param settings: global settings with at least a pair { 'force' : boolean }
-        @type param: dictionary'''
-        self.settings = settings
+        '''
+        Object initialization.
+        
+        @param settings: global settings with at least { 'force' : boolean }
+        @type param: dictionary
+        '''
+        self.__settings = settings
         self.artist = ''
         self.track = ''
         self.album = ''
         self.lyrics = [] # lyrics tags go in here
-           
-    def setMp3Tags(self, file):   
-        '''reads and stores MP3 tags (artist, track, lyrics)
+
+    def set_MP3_tags(self, file):
+        '''
+        Reads and stores MP3 tags (artist, track, lyrics).
+        
         @type file: string
-        @param file: name of tagged MP3 file to read tags from'''
-        if eyeD3.isMp3File(file): 
+        @param file: name of tagged MP3 file to read tags from
+        '''
+        if eyeD3.isMp3File(file):
             tag = eyeD3.Tag()
             tag.link(file)
             self.artist = tag.getArtist(eyeD3.ARTIST_FID)
             self.track = tag.getTitle()
             self.lyrics = tag.getLyrics()
             self.album = tag.getAlbum()
-    
-    def getMp3Tags(self):
-        '''return stored MP3 tags
+
+    def get_MP3_tags(self):
+        '''
+        Return stored MP3 tags.
+        
         @return: tuple of artist, track, album and lyrics array
-        @rtype: 4-tuple'''
+        @rtype: 4-tuple
+        '''
         return (self.artist, self.track, self.album, self.lyrics)
-    
-    def addLyricsFromString(self, mp3File, lyrics):
-        '''write lyrics string to mp3 file
-        @type mp3File: string
+
+    def add_lyrics_from_string(self, MP3_file, lyrics):
+        '''
+        Write lyrics string to mp3 file.
+        
+        @type MP3_file: string
         @type lyrics: string
         @param lyrics: song lyrics to be written
-        @param mp3File: name of MP3 file to write lyrics to
+        @param MP3_file: name of MP3 file to write lyrics to
         @rtype boolean
-        @return: true if modified, false if not'''
+        @return: true if modified, false if not
+        '''
         #print "DEBUG: %s" % type(lyrics)
         #lyrics = unicode(lyrics).encode('utf-8')
         lyrics = lyrics.replace("\n", "")
@@ -71,9 +98,9 @@ class TagHandler:
         tag = eyeD3.Tag()
         tag.header.setVersion(eyeD3.ID3_V2_4)
         tag.encoding = "\x03" # set UTF-8 encoding
-        tag.link(mp3File)
+        tag.link(MP3_file)
         try:
-            if self.settings['force'] == True:
+            if self.__settings['force'] == True:
                 tag.addLyrics(lyrics)
                 tag.update()
                 return True
@@ -81,28 +108,31 @@ class TagHandler:
                 existingTag = tag.getLyrics()
                 if len(existingTag) == 0: # no lyric frames, so we can write
                     tag.addLyrics(lyrics)
-                    tag.update()          
+                    tag.update()
                     return True
             return False
         except:
             return False
-    
-    def addLyricsFromFile(self, mp3File, lyricsFile):
-        '''write lyrics from text file to mp3 file
-        @type mp3File: string
-        @type lyricsFile: string
-        @param mp3File: name of file to modify lyric tag
-        @param lyricsFile: name of text file which contains song lyrics'''
-        lyrics = open(lyricsFile, "U").read()
-        lyrics = lyrics.replace("\r", "\r\n")  
+
+    def add_lyrics_from_file(self, MP3_file, lyricsfile):
+        '''
+        Write lyrics from text file to mp3 file.
+        
+        @type MP3_file: string
+        @type lyricsfile: string
+        @param MP3_file: name of file to modify lyric tag
+        @param lyricsfile: name of text file which contains song lyrics
+        '''
+        lyrics = open(lyricsfile, "U").read()
+        lyrics = lyrics.replace("\r", "\r\n")
         tag = eyeD3.Tag()
-        tag.link(mp3File)
+        tag.link(MP3_file)
         tag.header.setVersion(eyeD3.ID3_V2_4)
         tag.addLyrics(lyrics)
         tag.update()
-    
+
     def clear(self):
-        '''reset MP3 tags'''
+        '''Reset MP3 tags.'''
         self.artist = ''
         self.album = ''
         self.lyrics = []
@@ -110,8 +140,8 @@ class TagHandler:
 if __name__ == '__main__':
     # test routine
     settings = {}
-    tH = TagHandler(settings)
-    tH.addLyricsFromFile(sys.argv[1], sys.argv[2])
-    tH.setMp3Tags(sys.argv[1])
+    tagger = TagHandler(settings)
+    tagger.add_lyrics_from_file(sys.argv[1], sys.argv[2])
+    tagger.set_MP3_tags(sys.argv[1])
 
 

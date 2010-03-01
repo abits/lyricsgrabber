@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
+#==============================================================================
 # Timer.py - provides basic timing functionality for logging
-#
+# -*- coding: utf-8 -*-
+#---------------------------------------------------------------------------- #
 # Copyright (C) 2010 Christoph Martel
 #
 # This program is free software; you can redistribute it and/or modify it 
@@ -14,45 +15,50 @@
 #
 # You should have received a copy of the GNU General Public License 
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
+#==============================================================================
+'''
+Timer - Can be used to take running time of processes.
+@author: Christoph Martel
+@copyright: Christoph Martel
+@license: GPLv3
+'''
+
 
 import time
 
+
 class Timer():
-    '''An object of this class can be used to take the approx. running time of processes etc.
+    '''Can be used to take running time of processes.
     
-    Typical usage:
-    myTimer = Timer()
-    myTimer.start()
+    Time is retrieved in seconds passed.  Typical usage:
+    
+    timer = Timer()
+    timer.start()
       ... some processing ...
-    myTimer.stop()
-    print myTimer.getTime()
-    
-    Time is retrieved in seconds passed.
-    @author: Christoph Martel
-    @copyright: Christoph Martel
-    @license: GPLv3
+    timer.stop()
+    print timer.getTime()
     '''
     def __init__(self):
-        '''initalize a Timer object'''
-        self.passedSeconds = 0.0 # this is we we store the passed seconds
-        self.startSecond = 0.0
-        self.stopSecond = 0.0
-    
+        '''initalize a timer object'''
+        self.__passed_seconds = 0.0 # this is we we store the passed seconds
+        self.__start_second = 0.0
+        self.__stop_second = 0.0
+
     def start(self):
         '''start timer'''
-        self.startSecond = time.time()
-    
+        self.__start_second = time.time()
+
     def stop(self):
         '''stop timer and store passed seconds'''
-        self.stopSecond = time.time()
-        self.passedSeconds = self.stopSecond - self.startSecond
-    
+        self.__stop_second = time.time()
+        self.__passed_seconds = self.__stop_second - self.__start_second
+
     def getTime(self):
         '''retrieve stored passed seconds'''
-        return self.passedSeconds
-    
+        return self.__passed_seconds
+
     def resetTime(self):
         '''reset all initialization values'''
-        self.passedSeconds = 0.0
-        self.startSecond = 0.0
-        self.stopSecond = 0.0
+        self.__passed_seconds = 0.0
+        self.__start_second = 0.0
+        self.__stop_second = 0.0

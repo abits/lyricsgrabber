@@ -10,8 +10,8 @@
 # option) any later version.
 # This program is distributed in the hope that it will be useful, but 
 # WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
-# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License f
-# or more details.
+# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+# for more details.
 #
 # You should have received a copy of the GNU General Public License 
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
@@ -26,8 +26,10 @@ LlTrawler - searches and extracts lyrics against leoslyrics.com API.
 
 import urllib2
 import xml.etree.ElementTree as ET
+import Trawler
 
-class LlTrawler():
+
+class LlTrawler(Trawler.Trawler):
 
     '''
     Retrieves song lyrics from <http://www.leoslyrics.com/> via REST API.
@@ -45,8 +47,8 @@ class LlTrawler():
     '''
 
     def __init__(self, UID):
-        self.__API_searchURI = 'http://api.leoslyrics.com/api_search.php'
-        self.__API_lyricsURI = 'http://api.leoslyrics.com/api_lyrics.php'
+        self.__API_search_URI = 'http://api.leoslyrics.com/api_search.php'
+        self.__API_lyrics_URI = 'http://api.leoslyrics.com/api_lyrics.php'
         self.__response_HID = None
         self.__response_text = None
         self.__UID = UID  # use 'duane'
@@ -69,7 +71,7 @@ class LlTrawler():
         track = 'songtitle=' + urllib2.quote(track.encode('utf-8'))
         param_list = [auth, artist, track]
         parameters = '&'.join(param_list)
-        URI_list = [self.__API_searchURI, parameters]
+        URI_list = [self.__API_search_URI, parameters]
         HID_request_URI = '?'.join(URI_list)
         return HID_request_URI
 
@@ -86,7 +88,7 @@ class LlTrawler():
         HID = 'hid=' + HID
         param_list = [auth, HID]
         parameters = '&'.join(param_list)
-        URI_list = [self.__API_lyricsURI, parameters]
+        URI_list = [self.__API_lyrics_URI, parameters]
         text_request_URI = '?'.join(URI_list)
         return text_request_URI
 
@@ -99,7 +101,10 @@ class LlTrawler():
         @rtype: string
         @return: the track id of song we look for
         '''
-        tree = ET.parse(response)
+        try:
+            tree = ET.parse(response)
+        except:
+            return None
         if tree.find('*/result') == None:
             return None
         if tree.find('*/result').get('exactMatch') == 'true':
@@ -117,42 +122,16 @@ class LlTrawler():
         @rtype: boolean
         @return: success extracting lyrics
         '''
-        tree = ET.parse(response)
+        try:
+            tree = ET.parse(response)
+        except:
+            return None
         text = tree.findtext('lyric/text')
         if text is None:
             return False
         else:
             self.__text = text
             return True
-
-    def __query_server(self, request_URI):
-        '''
-        Queries the leoslyrics site, returns temp file name with response.
-        
-        @type  request_URI: string
-        @param request_URI: request as return by buildRequest method
-        @rtype: string
-        @return: name of temp file containing server response
-        '''
-        try:
-            response = urllib2.urlopen(request_URI)
-        except urllib2.URLError:
-            raise
-        return response
-
-    def __write_file(self, response, filename):
-        '''
-        Write server response message to file.
-        
-        @type response: string
-        @type filename: string
-        @param response: xml formatted string server response
-        @param filename: name of file to store xml data
-        '''
-        xml_file = open(filename, 'w')
-        for line in response:
-            xml_file.write(line)
-        xml_file.close()
 
     def get_text(self):
         '''
@@ -175,12 +154,15 @@ class LlTrawler():
         '''
         self.__text = ''
         HID_request_URI = self.__build_HID_request(artist, track) # build url
-        self.__response_HID = self.__query_server(HID_request_URI) # ask server
+        if self.query_server(HID_request_URI): # ask server
+            self.__response_HID = self.response
         self.__HID = self.__extract_HID(self.__response_HID) # parse response
         if self.__HID is not None:
             text_request_URI = self.__build_text_request(self.__HID)
-            self.__response_text = self.__query_server(text_request_URI)
-            if self.__extract_text(self.__response_text):
+            if self.query_server(text_request_URI):
+                self.__response_text = self.response
+            if not self.__response_text is None and \
+                self.__extract_text(self.__response_text):
                 return True
             else:
                 return False # no success, no lyrics found
