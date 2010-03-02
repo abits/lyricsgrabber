@@ -11,9 +11,12 @@ AM_INIT_AUTOMAKE([foreign])
 AC_COPYRIGHT([GNU GPL])
 AC_PREFIX_PROGRAM(python)
 
-
 # Checks for programs.
-AM_PATH_PYTHON([2.5])
+AM_PATH_PYTHON([2.5],,AC_MSG_ERROR([Cannot find recent enough Python interpreter.]))
+AC_PATH_PROG([EYED3],[eyeD3],[missing])
+if test "$EYED3" = "missing"; then
+   AC_MSG_ERROR([Cannot find Python library eyeD3.])
+fi
 
 # Checks for libraries.
 

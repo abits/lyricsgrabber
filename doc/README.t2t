@@ -1,4 +1,4 @@
-lyricsgrabber 0.1.1
+lyricsgrabber 0.1.2
 Chris Martel
 %%date(%m-%d-%Y)
 
@@ -16,15 +16,15 @@ features logging, so you could see what texts have been written to what
 files.
 
 = Requirements =
- -  [Python http://www.python.org] >= 2.3
+ -  [Python http://www.python.org] >= 2.5
  -  [eyeD3 http://eyed3.nicfit.net] >= 0.6.17
 
 = Installation =
 == Source tarball ==
-   ``gzip -dc lyricsgrabber-0.1.1.tar.gz | tar xvf -``
-   ``cd lyricsgrabber-0.1.1``
+   ``gzip -dc lyricsgrabber-0.1.2.tar.gz | tar xvf -``
+   ``cd lyricsgrabber-0.1.2``
    ``./configure``
-   ``maker``
+   ``make``
    ``make install (as root)``
 
 = How to use LyricsGrabber =

@@ -11,14 +11,14 @@ MD5SUM=md5sum
 SIGNPACKAGE=gpg --detach-sign --armor --local-user "<accidentalbits@googlemail.com>" 
 EXTRA_DIST= doc/README.t2t src ChangeLog
 
-all: module docs ChangeLog
+all: module
 
 module:
 	${PYTHON} setup.py build
-	
+
 install:
 	${PYTHON} setup.py install ${SETUP_ARGS}
-	
+
 	-mv -f ${bindir}/lyricsgrabber.py ${bindir}/lyricsgrabber
 	install -m 755 -d ${docdir}
 	install -m 644 README ${docdir}
@@ -58,12 +58,12 @@ ChangeLog:
 	@if test -d "${srcdir}/.git"; then\
 		rm -f ChangeLog &\
 		echo Creating ChangeLog &&\
-    	git log --date-order --date=short | \
-    	sed -e '/^commit.*$$/d' | \
-    	awk '/^Author/ {sub(/\\$$/,""); getline t; print $$0 t; next}; 1' | \
-    	sed -e 's/^Author: //g' | \
-    	sed -e 's/>Date:   \([0-9]*-[0-9]*-[0-9]*\)/>\t\1/g' | \
-    	sed -e 's/^\(.*\) \(<.*@.*>\)\t\(.*\)/\3    \1    \2/g' > ${srcdir}/ChangeLog;\
+	git log --date-order --date=short | \
+	sed -e '/^commit.*$$/d' | \
+	awk '/^Author/ {sub(/\\$$/,""); getline t; print $$0 t; next}; 1' | \
+	sed -e 's/^Author: //g' | \
+	sed -e 's/>Date:   \([0-9]*-[0-9]*-[0-9]*\)/>\t\1/g' | \
+	sed -e 's/^\(.*\) \(<.*@.*>\)\t\(.*\)/\3    \1    \2/g' > ${srcdir}/ChangeLog;\
 	fi
 
 sign-dist:
@@ -80,8 +80,9 @@ sign-dist:
 	${MD5SUM} ${DIST_NAME}.tar.gz > ${DIST_NAME}.tar.gz.md5
 	${SIGNPACKAGE} -o ${DIST_NAME}.tar.gz.asc ${DIST_NAME}.tar.gz	
 
-dist-hook: ChangeLog
-	cp ChangeLog dist/${DIST_NAME}
+dist-hook: docs ChangeLog
+	cp ChangeLog ${DIST_NAME}
+	cp doc/lyricsgrabber.1 ${DIST_NAME}/doc
 
 docs-clean:
 	-rm -f README
