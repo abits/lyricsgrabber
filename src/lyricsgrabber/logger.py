@@ -1,5 +1,5 @@
 #============================================================================== 
-# Logger.py - provides logging functionality to file and screen
+# logger.py - provides logging functionality to file and screen
 # -*- coding: utf-8 -*-
 #---------------------------------------------------------------------------- #
 # Copyright (C) 2010 Christoph Martel
@@ -17,7 +17,7 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #==============================================================================
 '''
-Logger - logging functionality for stdout and file
+logger - logging functionality for stdout and file
 @copyright: Christoph Martel
 @license: GPLv3
 @author: Christoph Martel

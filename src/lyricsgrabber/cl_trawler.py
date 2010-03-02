@@ -1,5 +1,5 @@
 #=============================================================================
-# ClTrawler.py - client for <http://www.chartlyrics.com/>
+# cl_trawler.py - client for <http://www.chartlyrics.com/>
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------- 
 # Copyright (C) 2010 Christoph Martel
@@ -17,7 +17,7 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #============================================================================= 
 '''
-ClTrawler - searches and extracts lyrics against chartlyrics API.
+cl_trawler - searches and extracts lyrics against chartlyrics API.
 @author: Christoph Martel
 @copyright: Christoph Martel
 @license: GPLv3
@@ -26,16 +26,16 @@ ClTrawler - searches and extracts lyrics against chartlyrics API.
 
 import urllib2
 import xml.etree.ElementTree as ET
-import Trawler
+import trawler
 
 
-class ClTrawler(Trawler.Trawler):
+class ClTrawler(trawler.Trawler):
 
     '''
     Retrieves song lyrics from <http://www.chartlyrics.com/> via REST API.
     
     A typical usage might look like:
-        trawler = ClTrawler()
+        trawler = cl_trawler()
         trawler.set_text(someArtist, someSong)
         if trawler.get_text() != '':    # make sure we have found lyrics
             lyrics = trawler.get_text() # read out the song lyrics

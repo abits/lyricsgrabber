@@ -1,5 +1,5 @@
 #==============================================================================
-# Walker.py - scans directories for suitable MP3 files
+# walker.py - scans directories for suitable MP3 files
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------------- 
 #
@@ -18,7 +18,7 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #==============================================================================
 '''
-Walker - scans a directory for suitable files
+walker - scans a directory for suitable files
 @copyright: Christoph Martel
 @license: GPLv3
 @author: Christoph Martel
@@ -27,7 +27,7 @@ Walker - scans a directory for suitable files
 
 import os
 import eyeD3
-import TagHandler
+import taghandler
 
 class Walker():
     '''Scans a directory and stores suitable files with tag information.
@@ -84,7 +84,7 @@ class Walker():
         @type fpath: string
         @param fpath: path of file to be tested
         '''
-        tH = TagHandler.TagHandler(self.__settings)
+        tH = taghandler.TagHandler(self.__settings)
         # this is the data structure which holds information of file
         file = {'path' : fpath,
                 'artist' : '',

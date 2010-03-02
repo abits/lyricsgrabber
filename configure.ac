@@ -1,8 +1,8 @@
-#                                               -*- Autoconf -*-
+# -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT([lyricsgrabber], [0.1.1], [Chris <accidentalbits@googlemail.com>])
+AC_INIT([lyricsgrabber], [0.1.2], [Chris <accidentalbits@googlemail.com>])
 PACKAGE_RELEASE_QUALITY=pre-alpha
 AC_SUBST([PACKAGE_RELEASE_QUALITY])
 AM_INIT_AUTOMAKE([foreign])

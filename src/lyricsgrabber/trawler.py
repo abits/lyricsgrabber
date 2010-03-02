@@ -1,5 +1,5 @@
 #==============================================================================
-# Trawler.py - client template for trawler modules
+# trawler.py - client template for trawler modules
 # -*- coding: utf-8 -*-
 #---------------------------------------------------------------------------- #
 # Copyright (C) 2010 Christoph Martel
@@ -17,7 +17,7 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #==============================================================================
 '''
-Trawler - parent for client modules for lyrics API.
+trawler - parent for client modules for lyrics API.
 @author: Christoph Martel
 @copyright: Christoph Martel
 @license: GPLv3

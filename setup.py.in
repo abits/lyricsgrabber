@@ -2,7 +2,7 @@
 
 from distutils.core import setup
 
-setup(name='LyricsGrabber',
+setup(name='lyricsgrabber',
       version='@PACKAGE_VERSION@',
       description='finds song lyrics and stores them in MP3 tags',
       author='Chris Martel',
@@ -10,6 +10,20 @@ setup(name='LyricsGrabber',
       license='GPL',
       url='http://lyricsgrabber.sourceforge.net/',
       package_dir = {'': 'src'},
-      packages=['LyricsGrabber'],
-      scripts=['src/lyricsgrabber.py']
+      packages=['lyricsgrabber'],
+      scripts=['src/lyricsgrabber.py'],
+      platforms=['All POSIX (Linux/BSD/UNIX-like OSes)'],
+      long_description= \
+      '''Lyricsgrabber is a very simple python script which searches lyrics 
+      for MP3s and embeds them in their tags. Relies on leoslyrics.com, 
+      chartlyrics.com, and eyeD3 for tagging. You pass Lyricsgrabber a 
+      directory or it automatically starts in the current working directory. 
+      It then collects all MP3 files in that directory, looks up their lyrics 
+      according to artist and trackname tags and, if it finds some text, 
+      stores them in the appropriate tag. If successful, it should be possible
+       to view the song lyrics on your iPod. You could make Lyricsgrabber 
+       search for MP3 files recursively below the start directory. 
+       Lyricsgrabber features logging, so you could see what texts have been 
+       written to what files.
+      '''
      )

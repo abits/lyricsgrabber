@@ -1,5 +1,5 @@
 #==============================================================================
-# LlTrawler.py - client for <http://www.leoslyrics.com/>
+# ll_trawler.py - client for <http://www.leoslyrics.com/>
 # -*- coding: utf-8 -*-
 #---------------------------------------------------------------------------- #
 # Copyright (C) 2010 Christoph Martel
@@ -17,7 +17,7 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #==============================================================================
 '''
-LlTrawler - searches and extracts lyrics against leoslyrics.com API.
+ll_trawler - searches and extracts lyrics against leoslyrics.com API.
 @author: Christoph Martel
 @copyright: Christoph Martel
 @license: GPLv3
@@ -26,10 +26,10 @@ LlTrawler - searches and extracts lyrics against leoslyrics.com API.
 
 import urllib2
 import xml.etree.ElementTree as ET
-import Trawler
+import trawler
 
 
-class LlTrawler(Trawler.Trawler):
+class LlTrawler(trawler.Trawler):
 
     '''
     Retrieves song lyrics from <http://www.leoslyrics.com/> via REST API.
@@ -37,7 +37,7 @@ class LlTrawler(Trawler.Trawler):
     parameters a user id from the website for REST calls.
     
     A typical usage might look like:
-        trawler = LlTrawler("duane")
+        trawler = ll_trawler("duane")
         trawler.set_text(someArtist, someSong)
         if trawler.get_text() != '':    # make sure we have found lyrics
             lyrics = trawler.get_text() # read out the song lyrics

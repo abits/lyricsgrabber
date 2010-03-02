@@ -1,5 +1,5 @@
 #==============================================================================
-# Timer.py - provides basic timing functionality for logging
+# timer.py - provides basic timing functionality for logging
 # -*- coding: utf-8 -*-
 #---------------------------------------------------------------------------- #
 # Copyright (C) 2010 Christoph Martel
@@ -17,7 +17,7 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #==============================================================================
 '''
-Timer - Can be used to take running time of processes.
+timer - Can be used to take running time of processes.
 @author: Christoph Martel
 @copyright: Christoph Martel
 @license: GPLv3

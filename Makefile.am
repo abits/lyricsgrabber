@@ -14,7 +14,6 @@ EXTRA_DIST= doc/README.t2t src ChangeLog
 all: module docs ChangeLog
 
 module:
-	touch src/LyricsGrabber/__init__.py
 	${PYTHON} setup.py build
 	
 install:
@@ -37,9 +36,10 @@ install:
 
 uninstall:
 	-rm -f ${bindir}/lyricsgrabber
-	-rm -rf ${pythondir}/LyricsGrabber
+	-rm -rf ${pythondir}/lyricsgrabber
 	-rm -rf ${docdir}
 	-rm -f ${mandir}/man1/lyricsgrabber.1.gz
+	-rm -f ${pythondir}/${DIST_NAME}-py2.6.egg-info
 
 docs:
 	@if test -f doc/README.t2t; then\
@@ -68,11 +68,11 @@ ChangeLog:
 
 sign-dist:
 #	mkdir -p -m 755 dist/${DIST_NAME}
-#	mkdir -p -m 755 dist/${DIST_NAME}/src/LyricsGrabber
+#	mkdir -p -m 755 dist/${DIST_NAME}/src/lyricsgrabber
 #	mkdir -p -m 755 dist/${DIST_NAME}/doc
 #	cp AUTHORS Changelog configure.ac COPYING MAKEFILE.am INSTALL \
 #	INSTALL.sh MANIFEST.in missing NEWS setup.py.in TODO dist/${DIST_NAME}
-#	cp -r src/LyricsGrabber/*.py dist/${DIST_NAME}/src/LyricsGrabber
+#	cp -r src/lyricsgrabber/*.py dist/${DIST_NAME}/src/lyricsgrabber
 #	cp src/lyricsgrabber dist/${DIST_NAME}/src
 #	cp doc/README dist/${DIST_NAME}/doc
 #	cp doc/lyricsgrabber.1 dist/${DIST_NAME}/doc
@@ -90,7 +90,6 @@ docs-clean:
 clean-local: docs-clean
 	find . -name \*~ -exec rm '{}' \;
 	-rm -rf build
-	-rm -f src/LyricsGrabber/__init__.py
 	find . -name \*.pyc -exec rm '{}' \;
 
 distclean-local:
@@ -104,4 +103,3 @@ maintainer-clean-local:
 	find . -name \*~ -exec rm '{}' \;
 	-rm -f config.* Makefile
 	-rm -f setup.py
-

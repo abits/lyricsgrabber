@@ -1,5 +1,5 @@
 #==============================================================================
-# TagHandler.py - reads and writes lyrics tags to MP3 files with eyeD3
+# taghandler.py - reads and writes lyrics tags to MP3 files with eyeD3
 # -*- coding: utf-8 -*-
 #---------------------------------------------------------------------------- #
 # Copyright (C) 2010 Christoph Martel
@@ -17,7 +17,7 @@
 # along with this program; if not, see <http://www.gnu.org/licenses/>.
 #==============================================================================
 '''
-TagHandler - Reads and writes MP3 lyrics tags based upon eyeD3 library.
+taghandler - Reads and writes MP3 lyrics tags based upon eyeD3 library.
 @author: Christoph Martel
 @copyright: Christoph Martel
 @license: GPLv3

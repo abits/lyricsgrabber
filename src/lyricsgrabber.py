@@ -50,12 +50,12 @@ Options:
 import os
 import socket
 from optparse import OptionParser
-import LyricsGrabber.ClTrawler
-import LyricsGrabber.LlTrawler
-import LyricsGrabber.TagHandler
-import LyricsGrabber.Walker
-import LyricsGrabber.Timer
-import LyricsGrabber.Logger
+import lyricsgrabber.cl_trawler
+import lyricsgrabber.ll_trawler
+import lyricsgrabber.taghandler
+import lyricsgrabber.walker
+import lyricsgrabber.timer
+import lyricsgrabber.logger
 
 
 if __name__ == '__main__':
@@ -98,17 +98,17 @@ if __name__ == '__main__':
                 'recursive' : options.recursive}
 
     # Start logger and initialize components.
-    logger = LyricsGrabber.Logger.Logger(settings)
+    logger = lyricsgrabber.logger.Logger(settings)
     log_string = ("\n\t verbose: %s\n\t force: %s\n\t interactive: %s" %
     	         (settings['verbose'],
     	          settings['force'],
     	          settings['interactive']))
     logger.add_to_log(log_string)
-    walker = LyricsGrabber.Walker.Walker(settings)
-    tag_handler = LyricsGrabber.TagHandler.TagHandler(settings)
-    leo_trawler = LyricsGrabber.LlTrawler.LlTrawler("duane")
-    chartlyrics_trawler = LyricsGrabber.ClTrawler.ClTrawler(settings)
-    timer = LyricsGrabber.Timer.Timer()
+    walker = lyricsgrabber.walker.Walker(settings)
+    tag_handler = lyricsgrabber.taghandler.TagHandler(settings)
+    leo_trawler = lyricsgrabber.ll_trawler.LlTrawler("duane")
+    chartlyrics_trawler = lyricsgrabber.cl_trawler.ClTrawler(settings)
+    timer = lyricsgrabber.timer.Timer()
 
     # Initialize working directory.
     if len(args) == 0:
@@ -125,6 +125,7 @@ if __name__ == '__main__':
     ignored_count, file_count = walker.getFileCounts()
     files = walker.getFiles()
 
+    # Retrieve lyrics for each file.
     for file in files:
         modified = False
         log_string = ("Searching lyrics for %s: %s" %
