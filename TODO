@@ -1,5 +1,7 @@
 Possible Enhancements:
 ======================
   - better handling of non-ascii text encodings
+  - check web site encodings (use chardet)
   - modularize web site clients (plugin structure)
   - support for more web sites
+  - GUI
