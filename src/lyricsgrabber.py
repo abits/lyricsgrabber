@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
     # Parse user options.
     usage = "usage: %prog [options] [DIRPATH]"
-    parser = OptionParser(usage=usage, version="%prog 0.1")
+    parser = OptionParser(usage=usage, version="%prog 0.1.2")
     parser.add_option("-f", "--force", dest="force",
                       help="overwrite existing lyrics tags",
                       default=False, action="store_true")
