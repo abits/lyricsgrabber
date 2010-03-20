@@ -127,7 +127,6 @@ if __name__ == '__main__':
 
     # Retrieve lyrics for each file.
     for file in files:
-        modified = False
         log_string = ("Searching lyrics for %s: %s" %
         	(file['artist'].encode('utf-8'), file['track'].encode('utf-8')))
         logger.add_to_log(log_string)
@@ -155,12 +154,12 @@ if __name__ == '__main__':
             if settings['interactive'] == True: # we ask politely
                 if (raw_input("\t=> Add text above to \"%s: %s\" [yn]? " %
                 	(file['artist'], file['track'])) == 'y'):
-                    modified = tag_handler.add_lyrics_from_string(file['path'],
-                                                                  lyrics)
+                    file['modified'] = \
+                        tag_handler.add_lyrics_from_string(file['path'], lyrics)
             else: # we don't care about user and write to file
-                modified = tag_handler.add_lyrics_from_string(file['path'],
-                                                              lyrics)
-            if modified:
+                file['modified'] = \
+                    tag_handler.add_lyrics_from_string(file['path'], lyrics)
+            if file['modified']:
                 modified_count += 1
                 lyricslines = lyrics.splitlines()
                 log_string = ("Added text \"%s...\" to file %s" %

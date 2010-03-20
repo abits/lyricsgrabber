@@ -23,7 +23,8 @@ trawler - parent for client modules for lyrics API.
 @license: GPLv3
 '''
 
-
+import time
+import sys
 import urllib2
 import xml.etree.ElementTree as ET
 
@@ -44,19 +45,55 @@ class Trawler():
 
     def query_server(self, request_URI):
         '''
-        Queries the leoslyrics site, sets temp file name with response.
-        
+        Queries the site in repeat loop.
         @type  request_URI: string
         @param request_URI: request as return by buildRequest method
         @rtype: boolean
         @return: did we successfully communicate with the server
         '''
+        wait_period = 5
+        retry_max = 1
+
+        response_code = 0
+        retry_counter = 0
+        while retry_counter <= retry_max:
+            retry_counter = retry_counter + 1
+            response_code = self.query(request_URI)
+            if response_code == 0:
+                return True
+            elif response_code == 104 and retry_max != 0:
+                print "Waiting %s seconds to reconnect..." % wait_period
+                time.sleep(wait_period)
+            else:
+                return False
+        
+            
+    def query(self, request_URI): 
+        '''
+        Executes a single server query, sets temp file with response.        
+        @type request_URI: string
+        @param request_URI: request as return by buildRequest
+        @rtype: int
+        @return: response code for the wrapper loop query_server
+        '''
         try:
             self.response = urllib2.urlopen(request_URI)
-            return True
+            return 0
+        except urllib2.HTTPError, e:
+            print 'The server couldn\'t fulfill the request.'
+            print 'Error code: ', e.code
+            self.response = None
+            return 1
+        except urllib2.URLError, e:
+            print 'Failed to reach a server.'
+            print 'Reason: ', e.reason
+            self.response = None
+            return 104
         except:
-            return False
-
+            print "Unexpected error:", sys.exc_info()[0]
+            self.response = None
+            return 1
+        
     def write_file(self, response, filename):
         '''
         Write server response message to file.

@@ -23,7 +23,8 @@ cl_trawler - searches and extracts lyrics against chartlyrics API.
 @license: GPLv3
 '''
 
-
+import time
+import socket
 import urllib2
 import xml.etree.ElementTree as ET
 import trawler
@@ -35,17 +36,20 @@ class ClTrawler(trawler.Trawler):
     Retrieves song lyrics from <http://www.chartlyrics.com/> via REST API.
     
     A typical usage might look like:
-        trawler = cl_trawler()
+        trawler = Cl_trawler(settings)
         trawler.set_text(someArtist, someSong)
         if trawler.get_text() != '':    # make sure we have found lyrics
             lyrics = trawler.get_text() # read out the song lyrics
     
     If no lyrics are found, the stored lyrics property of the object is set to 
     an empty string.  Responses may also be written to file.
+    The settings parameter is dictionary holding at least a key/value pair: 
+    { 'timeout' : int } to specify the server timeout.
     '''
 
     def __init__(self, settings):
-        self.__settings = settings
+#        self.wait_period = 1 # this server hates to be hammered with requests
+        socket.setdefaulttimeout(settings['timeout'])        
         self.__API_search_URI = \
             'http://api.chartlyrics.com/apiv1.asmx/SearchLyric'
         self.__API_lyrics_URI = \
@@ -157,12 +161,14 @@ class ClTrawler(trawler.Trawler):
         @rtype: boolean
         @return: success in finding lyrics for that parameters
         '''
+
         self.__text = ''
         ID_request_URI = self.__build_searchrequest(artist, track)
         if self.query_server(ID_request_URI):
             self.__search_response = self.response
         else:
             return False # no success, no lyrics found
+#        time.sleep(self.wait_period)
         if self.__extract_ID_and_checksum(self.__search_response):
             text_request_URI = self.__build_lyricsrequest(self.__lyrics_ID,
                                                      self.__lyrics_checksum)
@@ -170,8 +176,11 @@ class ClTrawler(trawler.Trawler):
                 self.__lyrics_response = self.response
             if not self.__lyrics_response is None and \
                 self.__extract_text(self.__lyrics_response):
+#                time.sleep(self.wait_period)
                 return True
             else:
+#                time.sleep(self.wait_period)
                 return False # no success, no lyrics found
         else:
+#            time.sleep(self.wait_period)
             return False # no success, no lyrics found

@@ -54,7 +54,8 @@ class TagHandler:
         self.artist = ''
         self.track = ''
         self.album = ''
-        self.lyrics = [] # lyrics tags go in here
+        self.lyrics = '' # lyrics go in here
+        self.order_number = None # track number and total tracks
 
     def set_MP3_tags(self, file):
         '''
@@ -68,8 +69,9 @@ class TagHandler:
             tag.link(file)
             self.artist = tag.getArtist(eyeD3.ARTIST_FID)
             self.track = tag.getTitle()
-            self.lyrics = tag.getLyrics()
+            self.lyrics = self.get_lyrics_from_tag(tag)
             self.album = tag.getAlbum()
+            self.order_number = tag.getTrackNum()
 
     def get_MP3_tags(self):
         '''
@@ -78,7 +80,11 @@ class TagHandler:
         @return: tuple of artist, track, album and lyrics array
         @rtype: 4-tuple
         '''
-        return (self.artist, self.track, self.album, self.lyrics)
+        return (self.artist, 
+                self.track, 
+                self.album, 
+                self.lyrics,
+                self.order_number)
 
     def add_lyrics_from_string(self, MP3_file, lyrics):
         '''
@@ -131,6 +137,40 @@ class TagHandler:
         tag.addLyrics(lyrics)
         tag.update()
 
+    def get_lyrics_from_file(self, MP3_file):
+        '''
+        Returns lyrics from MP3 file, or empty string.
+        
+        @type MP3_file: string
+        @param MP3_file: name of file to return lyrics
+        @rtype: string
+        @return: lyrics string from MP3 file or empty string
+        '''
+        tag = eyeD3.Tag()
+        tag.link(MP3_file)
+        lyrics_frames = tag.getLyrics()
+        lyrics = ''
+        if bool(lyrics_frames): 
+            for frame in lyrics_frames:
+                lyrics = lyrics + frame.lyrics
+        return lyrics    
+
+    def get_lyrics_from_tag(self, tag):
+        '''
+        Returns lyrics from MP3 file, or empty string.
+        
+        @type tag: instance
+        @param MP3_file: eyeD3.tag.Tag instance
+        @rtype: string
+        @return: lyrics string from MP3 file or empty string
+        '''
+        lyrics_frames = tag.getLyrics()
+        lyrics = ''
+        if bool(lyrics_frames): 
+            for frame in lyrics_frames:
+                lyrics = lyrics + frame.lyrics
+        return lyrics    
+        
     def clear(self):
         '''Reset MP3 tags.'''
         self.artist = ''

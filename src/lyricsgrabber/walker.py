@@ -50,7 +50,9 @@ class Walker():
                 'artist' : someArtist,
                 'track' : someSong,
                 'album' : someAlbum,
-                'lyrics' : [] }
+                'lyrics' : [],
+                'order_number' : someTuple,
+                'modified' : someBoolean}
     '''
     def __init__(self, settings):
         self.__settings = settings
@@ -90,7 +92,9 @@ class Walker():
                 'artist' : '',
                 'track' : '',
                 'album' : '',
-                'lyrics' : [] }
+                'lyrics' : '',
+                'order_number' : None,
+                'modified' : False}
         if not eyeD3.isMp3File(file['path']):
             self.__ignored_files_count += 1
             return False
@@ -99,8 +103,9 @@ class Walker():
             (file['artist'],
              file['track'],
              file['album'],
-             file['lyrics']) = tH.get_MP3_tags()
-        if not self.__settings['force'] or file['lyrics'] != []:
+             file['lyrics'],
+             file['order_number']) = tH.get_MP3_tags()
+        if self.__settings['force'] is False and bool(file['lyrics']):
             return False
         else:
             self.__file_container.append(file)
