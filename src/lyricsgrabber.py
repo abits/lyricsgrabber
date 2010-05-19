@@ -95,7 +95,8 @@ if __name__ == '__main__':
                 'force' : options.force,
                 'logFileName' : options.logFileName,
                 'interactive' : options.interactive,
-                'recursive' : options.recursive}
+                'recursive' : options.recursive,
+                'timeout' : 10}
 
     # Start logger and initialize components.
     logger = lyricsgrabber.logger.Logger(settings)

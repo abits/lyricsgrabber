@@ -18,7 +18,8 @@ if test "$EYED3" = "missing"; then
    AC_MSG_ERROR([Cannot find Python library eyeD3.])
 fi
 
-# Checks for libraries.
+# Checks for libraries with file test.
+AC_PY_CHECK_REQUIRED([BeautifulSoup])
 
 # Checks for header files.
 

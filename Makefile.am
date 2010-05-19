@@ -10,6 +10,7 @@ DIST_NAME=@PACKAGE_TARNAME@-@PACKAGE_VERSION@
 MD5SUM=md5sum
 SIGNPACKAGE=gpg --detach-sign --armor --local-user "<accidentalbits@googlemail.com>" 
 EXTRA_DIST= doc/README.t2t src ChangeLog
+ACLOCAL_AMFLAGS = -I m4
 
 all: module
 

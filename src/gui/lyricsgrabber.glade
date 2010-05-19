@@ -90,6 +90,15 @@
                       </object>
                     </child>
                     <child>
+                      <object class="GtkImageMenuItem" id="menuitem_edit_editlyrics">
+                        <property name="label">gtk-edit</property>
+                        <property name="visible">True</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_menuitem_edit_editlyrics_activate" after="yes"/>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem_edit_options">
                         <property name="label">gtk-preferences</property>
                         <property name="visible">True</property>
@@ -181,6 +190,19 @@
               </packing>
             </child>
             <child>
+              <object class="GtkToolButton" id="toolbutton_editlyrics">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Bearbeiten</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-edit</property>
+                <signal name="clicked" handler="on_toolbutton_editlyrics_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolButton" id="toolbutton_options">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Einstellungen</property>
@@ -225,6 +247,14 @@
           <object class="GtkStatusbar" id="statusbar_main">
             <property name="visible">True</property>
             <property name="spacing">2</property>
+            <child>
+              <object class="GtkProgressBar" id="status_progressbar">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>

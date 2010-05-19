@@ -99,7 +99,7 @@ class TagHandler:
         '''
         #print "DEBUG: %s" % type(lyrics)
         #lyrics = unicode(lyrics).encode('utf-8')
-        lyrics = lyrics.replace("\n", "")
+        #lyrics = lyrics.replace("\n", "")
         #print "DEBUG: %s" % type(lyrics)
         tag = eyeD3.Tag()
         tag.header.setVersion(eyeD3.ID3_V2_4)
